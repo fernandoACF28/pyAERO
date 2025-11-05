@@ -1,0 +1,17 @@
+Metadata-Version: 2.4
+Name: pyAERO
+Version: 0.1
+Summary: this package is useful for downloading AERONET data
+Home-page: https://github.com/fernandoACF28/pyAERO
+Author: Fernando Fernandes
+Author-email: fernando.allysson@usp.br
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Requires-Dist: tqdm
+Requires-Dist: wget
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: home-page
+Dynamic: requires-dist
+Dynamic: summary

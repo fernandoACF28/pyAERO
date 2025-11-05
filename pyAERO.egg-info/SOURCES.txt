@@ -1,0 +1,9 @@
+README.md
+setup.py
+pyAERO/__init__.py
+pyAERO/pyAERO.py
+pyAERO.egg-info/PKG-INFO
+pyAERO.egg-info/SOURCES.txt
+pyAERO.egg-info/dependency_links.txt
+pyAERO.egg-info/requires.txt
+pyAERO.egg-info/top_level.txt
