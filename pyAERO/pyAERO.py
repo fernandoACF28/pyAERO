@@ -1,4 +1,5 @@
 import wget
+import time
 from tqdm import tqdm
 
 def GetDataAEROET(station,start_date,end_date,
@@ -93,6 +94,8 @@ def GetDataAEROET(station,start_date,end_date,
     try:
         for _ in tqdm(PATH_DOWNLOAD,desc=f'Downloading - {station} Station'
                       ,ascii="●cC-"):
-            try: wget.download(PATH_DOWNLOAD[0],out=f'{station}_{vars}.csv')
+            try: 
+                wget.download(PATH_DOWNLOAD[0],out=f'{station}_{vars}.csv')
+                time.sleep(4)
             except Exception as e: print(e)
     except: print('###################### Error in download ####################') 
