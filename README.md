@@ -1,6 +1,6 @@
 # pyAERO
 
-pyAERO is a util packages for download aeronet datas.
+pyAERO are useful package for download aeronet datas.
 
 Some vars from AERONET stations?
 
