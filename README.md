@@ -53,5 +53,5 @@ Here are explanation of vars, its necessary use the ***inversion type*** for cho
 | LID  | Lidar and Depolarization Ratios |
 | FLX  | Spectral flux |
 | ALL  | All of the above retrievals (SIZ to FLUX) in one file |
-| PFN*  | Phase function (available for only all points data format: AVG=10) |
+| PFN  | Phase function (available for only all points data format: AVG=10) |
 | U27  | Estimation of Sensitivity to 27 Input Uncertainty Variations (available for only all points data format: AVG=10 and ALM20 and HYB20) |
