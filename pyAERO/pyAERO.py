@@ -1,9 +1,10 @@
-import wget
 import time
+import random
+import requests
 from tqdm import tqdm
 
 def GetDataAEROET(station,start_date,end_date,
-                  vars,temporal_type,inversion_type=None):
+                  vars,temporal_type,inversion_type=None,user_name=None):
     '''
     station: Name of your station
     start_date: start date of type: YYYY-MM-DD
@@ -11,6 +12,7 @@ def GetDataAEROET(station,start_date,end_date,
     vars: name of vars type: AOD10 or AOD15
     temporal_type: True = Daily Mean, False = All data
     inversion_type: inv ex: ALM15 or HYB20
+    user_name: inser your e-mail to contact
     '''
     if temporal_type == True: AVG = 10
     else: AVG = 20
@@ -20,6 +22,24 @@ def GetDataAEROET(station,start_date,end_date,
         print(f'{vars} is not valid variable')
         print(f'Are you sure this variable {vars} is a correct?')
         print(f'Try: {valid_vars}')
+
+    def Download(path,station,user_name):
+        name_file = f'{station}_{vars}.csv'
+
+        if os.path.exists(name_file): return 
+        if user_name == None:headers = {'User-Agent': f'Python Script for Aerosol Research'}
+        else:headers = {'User-Agent': f'Python Script for Aerosol Research (contact {user_name})'}
+        progress_bar.set_description(f'Download for station: {station}...') # (Opcional) Atualiza o texto
+        time.sleep(1)
+        progress_bar.update(1)
+        response = requests.get(path, headers=headers)
+        response.raise_for_status() 
+        with open(name_file, 'w', encoding='utf-8') as f:
+            f.write(response.text)
+        progress_bar.set_description(f'Download in: {name_file}')
+        time.sleep(1)
+        progress_bar.update(1)
+        return response
 
     try:
         start_date = start_date.split('-')
@@ -90,12 +110,20 @@ def GetDataAEROET(station,start_date,end_date,
         except Exception as e: print(e)
     
     else: PRINTEXCEPT(vars,all_vars)
-        
-    try:
-        for _ in tqdm(PATH_DOWNLOAD,desc=f'Downloading - {station} Station'
-                      ,ascii="●cC-"):
-            try: 
-                wget.download(PATH_DOWNLOAD[0],out=f'{station}_{vars}.csv')
-                time.sleep(4)
-            except Exception as e: print(e)
-    except: print('###################### Error in download ####################') 
+
+    with tqdm(total=3, desc='downloading your data') as progress_bar:
+        try: response = Download(PATH_DOWNLOAD[0],station,user_name)
+        except requests.exceptions.HTTPError as errh:
+            print(f"Erro de HTTP: {errh}")
+            if response.status_code == 429:
+                print(">> (Too Many Requests). icrease the sleep time <<<")
+        except requests.exceptions.ConnectionError as errc:
+            print(f"Connection Error: {errc}")
+        except Exception as e: print(f'Error! : {e}')
+            
+        # time for not crash for 
+        delay = random.uniform(4, 8)
+        progress_bar.set_description(f'Wait for {delay:.1f} seconds...')
+        time.sleep(delay)
+        progress_bar.update(1) 
+        progress_bar.set_description('Finish Download')
