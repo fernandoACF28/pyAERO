@@ -4,7 +4,7 @@ from setuptools  import setup, find_packages
 setup(name="pyAERO",
 	version="0.1",
 	packages=find_packages(),
-	install_requires=['tqdm','wget'],
+	install_requires=['tqdm','request','random','time'],
 	author="Fernando Fernandes",
 	author_email="fernando.allysson@usp.br",
 	description="this package is useful for downloading AERONET data",
