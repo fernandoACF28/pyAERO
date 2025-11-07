@@ -2,20 +2,69 @@ import os
 import time
 import random
 import requests
+import numpy as np
+import pandas as pd
 from tqdm import tqdm
 
-def GetDataAEROET(station,start_date,end_date,
-                  vars,temporal_type,inversion_type=None,user_name=None):
+def OrganizeTime(df):
+    try:
+        df['Date(dd:mm:yyyy)'] = pd.to_datetime(df['Date(dd:mm:yyyy)'],format ='%d:%m:%Y')
+        df['Time(hh:mm:ss)'] = pd.to_timedelta(df['Time(hh:mm:ss)'])
+        old_var,new_var = df.columns[-1], df.columns[-1][:-4]+'_'
+        df = df.rename(columns={old_var:new_var})
+        df['time'] = df['Date(dd:mm:yyyy)']+df['Time(hh:mm:ss)']
+        df = df.drop(columns=['Date(dd:mm:yyyy)','Time(hh:mm:ss)'])
+        df[new_var] = df[new_var].replace('-999.<br>',np.nan)
+        df.insert(0, 'time', df.pop('time'))
+    except:
+        df['Date_(dd:mm:yyyy)'] = pd.to_datetime(df['Date_(dd:mm:yyyy)'],format ='%d:%m:%Y')
+        df['Time_(hh:mm:ss)'] = pd.to_timedelta(df['Time_(hh:mm:ss)'])
+        old_var,new_var = df.columns[-1], df.columns[-1][:-4]+'_'
+        df = df.rename(columns={old_var:new_var})
+        df['time'] = df['Date_(dd:mm:yyyy)']+df['Time_(hh:mm:ss)']
+        df = df.drop(columns=['Date_(dd:mm:yyyy)','Time_(hh:mm:ss)'])
+        df[new_var] = df[new_var].replace('-999.<br>',np.nan)
+        df.insert(0, 'time', df.pop('time'))
+    return df
+
+def TreatmentData(path,i):
+    df = pd.read_csv(path,skiprows=i,encoding='latin1')[:-1]
+    station = df['AERONET_Site'][0]
+    var = path.split('_')[-1][:-4]
+    df = OrganizeTime(df)
+    os.remove(path)
+    df.to_csv(path,index=False)
+    del station,var
+
+def RewriteTheFile(path):
+    file = open(path)
+    if len(file.read()) >= 15:
+        for i in range(15):
+            try: TreatmentData(path,i)
+            except: pass 
+    else: print("the dataframe is empty")
+    file.close()
+
+def GetDataAEROET(station:str,
+                  start_date:str,
+                  end_date:str,
+                  vars:str,
+                  temporal_type:str,
+                  inversion_type=None,
+                  user_name=None):
     '''
     station: Name of your station
     start_date: start date of type: YYYY-MM-DD
     end_date: start date of type: YYYY-MM-DD
     vars: name of vars type: AOD10 or AOD15
-    temporal_type: True = Daily Mean, False = All data
+    temporal_type: True =All data, False = Daily Mean
     inversion_type: inv ex: ALM15 or HYB20
     user_name: inser your e-mail to contact
     '''
-    if temporal_type == True: AVG = 10
+
+    if temporal_type == 'all': AVG = 10
+    elif temporal_type =='daily': AVG = 20
+    elif temporal_type =='daily average': AVG = 20
     else: AVG = 20
 
     def PRINTEXCEPT(vars,valid_vars):
@@ -40,7 +89,8 @@ def GetDataAEROET(station,start_date,end_date,
         progress_bar.set_description(f'Download in: {name_file}')
         time.sleep(1)
         progress_bar.update(1)
-        return response
+        return response, name_file
+    
 
     try:
         start_date = start_date.split('-')
@@ -113,7 +163,9 @@ def GetDataAEROET(station,start_date,end_date,
     else: PRINTEXCEPT(vars,all_vars)
 
     with tqdm(total=3, desc='downloading your data') as progress_bar:
-        try: response = Download(PATH_DOWNLOAD[0],station,user_name)
+        try: 
+            response,name_file = Download(PATH_DOWNLOAD[0],station,user_name)
+            RewriteTheFile(name_file)
         except requests.exceptions.HTTPError as errh:
             print(f"Erro de HTTP: {errh}")
             if response.status_code == 429:
