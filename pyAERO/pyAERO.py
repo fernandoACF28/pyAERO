@@ -5,6 +5,8 @@ import requests
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from warnings import filterwarnings
+filterwarnings('ignore')
 
 def OrganizeTime(df):
     try:
